@@ -1,10 +1,30 @@
 var http = require('http');
+var firebase = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 var Server = require('socket.io');
+var admin = require("firebase-admin");
 
+var serviceAccount = require("./dmotimer-fec6c-firebase-adminsdk-rhvlr-d257689ca0.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://dmotimer-fec6c-default-rtdb.firebaseio.com"
+});
 const httpServer = http.createServer();
 
+const db = getDatabase();
+const refe = db.ref("Horario/");
+
 var runs = {dreaper:{status:'off',minutes:'5m',seconds:'1'},minato:{status:'off',hour:'1h',minutes:'5m',seconds:'1'},chaveirot:{status:'off',minutes:'5m',seconds:'1'},chaveiro:{status:'off',minutes:'5m',seconds:'1'}}
+
+setInterval(function() {
+
+  refe.set(runs)
+}, 1000);
+refe.get("Horario/").then((data) => {
+  runs = data.val()
+})
 
 const io = new Server.Server(httpServer, {
     cors: {
